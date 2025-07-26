@@ -31,7 +31,7 @@ let persons = [
 
 app.use(morgan('tiny'))
 app.use(express.json())
-app.use(express.static('dist'))
+// app.use(express.static('dist'))
 // app.use(cors())
 
 app.get('/', (request, response) => {
@@ -63,33 +63,43 @@ app.get('/info', (request, response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
+  console.log("delete goes here")
   const id = request.params.id
   persons = persons.filter(person => person.id !== id)
 
   response.status(204).end()
 })
 
+const generateId = () => {
+  const maxId = 
+  persons.length > 0 ? Math.max(...persons.map((n) => Number(n.id))) : 0
+  return String(maxId + 1)
+}
+
+
 app.post('/api/persons', (request, response) => {
-  const person = request.body
+  const body = request.body
   
-  if(!person.name){
+  if(!body.name){
     response.status(400).end('missing name attribute')
   }
-  if(!person.number){
+  if(!body.number){
     response.status(400).end('missing number attribute')
   }
-  if(persons.find(obj => obj.name === person.name)){
+  if(persons.find(obj => obj.name === body.name)){
     response.status(400).end('name must be unique')
   }
   
-  let id = Math.floor(Math.random() * 2^31)
-  persons.push({
-    "id": id.toString(),
-    "name": person.name,
-    "number": person.number
-  })
+  // let id = Math.floor(Math.random() * 2^31)
+  const person = {
+    id: generateId(),
+    name: body.name,
+    number: body.number
+  }
+  
+  persons = persons.concat(person)
 
-  console.log(person)
+  console.log(body)
   
   //used to check headers of a request
   // console.log(request.headers)
